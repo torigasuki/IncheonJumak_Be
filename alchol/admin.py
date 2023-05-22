@@ -1,3 +1,5 @@
 from django.contrib import admin
+from alchol.models import Alchol
 
-# Register your models here.
+
+admin.site.register(Alchol)
