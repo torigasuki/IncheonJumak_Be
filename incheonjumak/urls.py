@@ -20,8 +20,11 @@ from incheonjumak import settings
 from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('user/', include("user.urls")),
+    path('api/user/', include('user.urls')),
     path('review/', include("review.urls")),
+    path('alchol/', include('alchol.urls')),
+    path('brewery/', include('brewery.urls')),
+    path('event/', include('information.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

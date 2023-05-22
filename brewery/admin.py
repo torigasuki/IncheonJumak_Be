@@ -1,3 +1,5 @@
 from django.contrib import admin
+from brewery.models import Brewery
 
-# Register your models here.
+
+admin.site.register(Brewery)
