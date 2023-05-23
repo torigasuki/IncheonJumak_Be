@@ -61,10 +61,10 @@ class SendEmailView(APIView):
                 Verify.objects.create(email=email,code=code)
                 
                 timer = 600
-                Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
+                # Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
                 
-                #return Response({'code':code},status=status.HTTP_200_OK) #테스트용
-                return Response({'success':'success'},status=status.HTTP_200_OK)
+                return Response({'code':code},status=status.HTTP_200_OK) #테스트용
+                # return Response({'success':'success'},status=status.HTTP_200_OK)
 
 class VerificationEmailView(APIView):
     permission_classes = [permissions.AllowAny]
