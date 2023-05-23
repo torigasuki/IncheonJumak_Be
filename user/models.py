@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-
+from django.core.validators import RegexValidator
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email,nickname, password=None):
@@ -18,6 +18,7 @@ class MyUserManager(BaseUserManager):
 
         user.set_password(password)
         user.save(using=self._db)
+        Profile.objects.create(user=user)
         return user
 
     def create_superuser(self, email,nickname='admin', password=None):
@@ -32,6 +33,7 @@ class MyUserManager(BaseUserManager):
         )
         user.is_admin = True
         user.save(using=self._db)
+        Profile.objects.create(user=user)
         return user
 
 
@@ -42,7 +44,11 @@ class User(AbstractBaseUser):
         unique=True,
     )
     
-    
+    password = models.CharField(max_length=128, validators=[RegexValidator(
+        regex="(?=.*\d)(?=.*[a-z])(?=.*\W)[a-zA-Z\d\W]{8,}$",
+        message="비밀번호에 특수문자, 숫자, 영문자를 포함하여 8자리 이상이어야 합니다.",
+        code = "invalid_password"
+    )])
     nickname = models.CharField(max_length=20, unique=True)
     following = models.ManyToManyField("self", symmetrical=False, related_name="followers")
     is_active = models.BooleanField(default=True)
@@ -72,6 +78,10 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
     
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profileimage=models.ImageField(upload_to='profile/', blank=True, null=True)
+    introduction = models.TextField(blank=True, null=True)
     
 class Verify(models.Model):
     email = models.EmailField()
