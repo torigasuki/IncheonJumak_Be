@@ -17,6 +17,9 @@ from .serializers import UserCreateSerializer,CustomTokenObtainPairSerializer,Pr
 from rest_framework_simplejwt.views import (
     TokenObtainPairView
 )
+from .models import User,Verify, Follow, BookMark
+from django.template.loader import render_to_string
+from decouple import config
 from threading import Timer
 import re
 import requests
@@ -156,7 +159,7 @@ class BookMarkView(APIView):
             bookmark.delete()
             return Response({"message":"북마크📌 취소"}, status=status.HTTP_200_OK)
         else:
-            BookMark.objects.create(id=request.user, alchol_id=alchol_id)
+            BookMark.objects.create(user_id=request.user, alchol_id=alchol_id)
             return Response({"message":"북마크📌"}, status=status.HTTP_200_OK)
 
 class BookMarkListView(APIView):
