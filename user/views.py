@@ -110,7 +110,7 @@ class ProfileView(APIView):
 
 class FollowView(APIView):
     """follow를 생성/해제하는 View"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
         request_user = request.user
@@ -151,9 +151,9 @@ class FollowerView(APIView):
 
 class BookMarkView(APIView):
     """BookMark 생성, 취소 기능"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request, alchol_id):
         bookmark = BookMark.objects.filter(user_id=request.user, alchol_id=alchol_id).last()
         if bookmark:
             bookmark.delete()
