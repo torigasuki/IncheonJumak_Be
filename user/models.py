@@ -78,9 +78,12 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
     
+    
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profileimage=models.ImageField(upload_to='profile/', blank=True, null=True)
+    profileimage=models.ImageField(upload_to= 'profile/', blank=True, null=True)
     introduction = models.TextField(blank=True, null=True)
     
 class Verify(models.Model):

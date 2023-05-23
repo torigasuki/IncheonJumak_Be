@@ -97,3 +97,11 @@ class ProfileView(APIView):
         me = request.user
         profile=Profile.objects.get(user=me)
         return Response({'user': UserSerializer(me).data, 'profile': ProfileSerializer(profile).data}, status=status.HTTP_200_OK)
+
+    def put(self,request):
+        me = request.user
+        profile=Profile.objects.get(user=me)
+        serializer = ProfileSerializer(profile,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
