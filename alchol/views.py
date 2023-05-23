@@ -9,7 +9,9 @@ from rest_framework.pagination import PageNumberPagination
 from alchol.serializers import AlcholListSerializer
 
 class AlcholPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 2 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
+
+    
 class AlcholView(APIView):
     pagination_class = AlcholPagination
     serializer_class = AlcholListSerializer

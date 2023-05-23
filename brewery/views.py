@@ -7,15 +7,11 @@ from brewery.models import Brewery
 from brewery.serializers import BrewerySerializer, BreweryListSerializer
 from rest_framework.pagination import PageNumberPagination
 
-
-class BreweryView(APIView):
-    def get(self, request):
-        breweries = Brewery.objects.all()
-        serializer = BrewerySerializer(breweries, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
 class BreweryPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 2 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
+
+
 class BreweryView(APIView):
     pagination_class = BreweryPagination
     serializer_class = BreweryListSerializer
@@ -31,7 +27,6 @@ class BreweryView(APIView):
         return self._paginator
 
     def paginate_queryset(self, queryset):
-
         if self.paginator is None:
             return None
         return self.paginator.paginate_queryset(queryset,self.request, view=self)
