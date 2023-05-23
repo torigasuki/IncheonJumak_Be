@@ -17,4 +17,8 @@ urlpatterns = [
     path("<int:user_id>/followings/", views.FollowingView.as_view(), name="followings"),
     path("<int:user_id>/followers/", views.FollowerView.as_view(), name="followers"),
 
+    #bookmark 기능 url
+    path("<int:user_id>/bookmark/", views.BookMarkView.as_view(), name="bookmark_view"),
+    path("<int:user_id>/bookmark_list/",views.BookMarkListView.as_view(),name="bookmark_list_view",),
+
 ]

@@ -36,13 +36,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 # 다른 유저에게 보이는 profile serializer입니다
-class ShowUserProfileSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
     follower = serializers.SerializerMethodField()
+    bookmark = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'nickname', 'following', 'follower',] 
+        fields = ['id', 'email', 'nickname', 'following', 'follower','bookmark',] 
+
 
     # 프론트에서 구현할 수 있는 부분이라 일단 주석달아둡니다
     # def get_followers_count(self, obj):
