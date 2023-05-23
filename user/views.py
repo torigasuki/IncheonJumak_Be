@@ -85,3 +85,44 @@ class SignUp(APIView):
         
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+
+class FollowView(APIView):
+    """follow를 생성/해제하는 View"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        request_user = request.user
+        following_user = Follow.objects.filter(id=request_user, user_id=user_id).last()
+        if following_user:
+            following_user.delete()
+            return Response({"message":"팔로우 취소"}, status=status.HTTP_200_OK)
+        else:
+            Follow.objects.create(id=request_user, user_id=user_id)
+            return Response({"message":"팔로우"}, status=status.HTTP_200_OK)
+
+class FollowingView(APIView):
+    """해당 user가 follow한 user 가져오기, following"""
+    def get(self, request, user_id):
+
+        user = User.objects.get(id=user_id)
+        following_list = Follow.objects.filter(following=user) 
+        #follow한 user가 없으면
+        if not following_list:
+            return Response({'message': '팔로우한 계정이 없습니다.'}, status=status.HTTP_204_OK)
+        #follow한 user가 있으면
+        else:
+            return Response(following_list.data, status=status.HTTP_200_OK)
+        
+        
+class FollowerView(APIView):
+    """ 해당 user를 follow한 user 가져오기. follower"""
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        follower_list = Follow.objects.filter(follower=user)
+
+        if not follower_list:
+            return Response({'message': '팔로워가 없습니다.'}, status=status.HTTP_204_OK)
+        else:
+            return Response(follower_list.data, status=status.HTTP_200_OK)

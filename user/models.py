@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-
+from alchol.models import Alchol
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email,nickname, password=None):
@@ -44,7 +44,9 @@ class User(AbstractBaseUser):
     
     
     nickname = models.CharField(max_length=20, unique=True)
-    following = models.ManyToManyField("self", symmetrical=False, related_name="followers")
+    followings = models.ManyToManyField("self", symmetrical=False, through='Follow')
+    bookmark = models.ManyToManyField("user.BookMark", default=[], through='BookMark')
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -78,3 +80,12 @@ class Verify(models.Model):
     code = models.CharField(max_length=6)
     verification = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Follow(models.Model):
+    following = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='follower')
+    follower = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='following')
+
+class BookMark(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, null=True)
+    alchol = models.ForeignKey('alchol.Alchol', on_delete=models.CASCADE, null=True)
+
