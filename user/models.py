@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.core.validators import RegexValidatorfrom 
+from django.core.validators import RegexValidator
 from alchol.models import Alchol
 
 class MyUserManager(BaseUserManager):
