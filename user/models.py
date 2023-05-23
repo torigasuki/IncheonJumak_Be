@@ -52,7 +52,7 @@ class User(AbstractBaseUser):
     )])
     nickname = models.CharField(max_length=20, unique=True)
     followings = models.ManyToManyField("self", symmetrical=False, through='Follow')
-    bookmark = models.ManyToManyField("user.BookMark", default=[], through='BookMark')
+    bookmark = models.ManyToManyField("alchol.Alchol", default=[], through='BookMark')
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
