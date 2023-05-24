@@ -89,7 +89,7 @@ class signUpTest(APITestCase):
         self.url = reverse('signup')
         self.verify_t = Verify.objects.create(email='test@test.com',code='123456',verification=True)
         self.verify_f = Verify.objects.create(email='test2@test.com',code='123456')
-        self.user = User.objects.create(email='test3@test.com',password='12345678@', nickname='test2')
+        self.user = User.objects.create_user(email='test3@test.com',password='12345678@', nickname='test2')
         
     def test_sign_up(self):
         user ={
@@ -171,3 +171,40 @@ class signUpTest(APITestCase):
         }
         response = self.client.post(self.url,user,format='json')
         self.assertEqual(response.status_code,400)
+        
+class loginTest(APITestCase):
+    def setUp(self):
+        self.url = reverse('login')
+        self.user_data = User.objects.create_user(email='test@test.com',password='qwer1234@', nickname='test')
+
+    def test_login(self):
+        user ={
+            'email':'test@test.com',
+            'password':'qwer1234@',
+        }
+        response = self.client.post(self.url,user,format='json')
+        self.assertEqual(response.status_code,200)
+    
+    def test_login_not_match_email(self):
+        user ={
+            'email':'test2@test.com',
+            'password':'qwer1234@',
+        }
+        response = self.client.post(self.url,user,format='json')
+        self.assertEqual(response.status_code,401)
+    
+    def test_login_not_match_password(self):
+        user ={
+            'email':'test@test.com',
+            'password':'12345678',
+        }
+        response = self.client.post(self.url,user,format='json')
+        self.assertEqual(response.status_code,401)
+        
+    def test_login_not_match_both(self):
+        user ={
+            'email':'test2@test.com',
+            'password':'12345678',
+        }
+        response = self.client.post(self.url,user,format='json')
+        self.assertEqual(response.status_code,401)
