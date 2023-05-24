@@ -22,7 +22,10 @@ from django.template.loader import render_to_string
 from decouple import config
 from threading import Timer
 import re
-import requests
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 EMAIL_REGEX = re.compile(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
 # Create your views here.
@@ -37,6 +40,15 @@ class SendEmailView(APIView):
         except:
             pass
     
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['email'],
+            properties={
+                'email':openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+    )
     def post(self,request):
         email = request.data.get('email',None)
         if email is None:
@@ -68,6 +80,17 @@ class SendEmailView(APIView):
 
 class VerificationEmailView(APIView):
     permission_classes = [permissions.AllowAny]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['email', 'code'],
+            properties={
+                'email':openapi.Schema(type=openapi.TYPE_STRING),
+                'code':openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+    )
     def post(self,request):
         email = request.data.get('email',None)
         code = request.data.get('code',None)
@@ -82,8 +105,12 @@ class VerificationEmailView(APIView):
             else:
                 return Response({'error':'인증 코드가 틀렸습니다'},status=status.HTTP_400_BAD_REQUEST)
             
+                
+
 class SignUpView(APIView):
     permission_classes = [permissions.AllowAny]
+
+    @swagger_auto_schema(request_body=UserCreateSerializer)
     def post(self, request):
         serializer = UserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -216,24 +243,23 @@ class FollowerView(APIView):
             return Response(follower_list.data, status=status.HTTP_200_OK)
 
 
-
 class BookMarkView(APIView):
     """BookMark 생성, 취소 기능"""
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request,alchol_id):
-        bookmark = BookMark.objects.filter(user_id=request.user, alchol_id=alchol_id).last()
+    def post(self, request, alchol_id):
+        bookmark = BookMark.objects.filter(marked_user_id=request.user, alchol_id=alchol_id).last()
         if bookmark:
             bookmark.delete()
             return Response({"message":"북마크📌 취소"}, status=status.HTTP_200_OK)
         else:
-            BookMark.objects.create(user_id=request.user, alchol_id=alchol_id)
+            BookMark.objects.create(marked_user_id=request.user, alchol_id=alchol_id)
             return Response({"message":"북마크📌"}, status=status.HTTP_200_OK)
 
 class BookMarkListView(APIView):
     """특정 유저의 bookmark list 가져오기"""
     def get(self, request, user_id):
-        bookmark = BookMark.objects.filter(user_id=user_id)
+        bookmark = BookMark.objects.filter(marked_user_id=user_id)
         if not bookmark:
             return Response({"message":"북마크📌가 없습니다"}, status=status.HTTP_204_OK)
         else:
