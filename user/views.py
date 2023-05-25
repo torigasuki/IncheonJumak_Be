@@ -22,7 +22,7 @@ from django.template.loader import render_to_string
 from decouple import config
 from threading import Timer
 import re
-
+import requests
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -152,14 +152,52 @@ class KakaoLoginView(APIView):
             },
         )
         access_token = access_token.json().get("access_token")
-        user_data = requests.get("https://kapi.kakao.com/v2/user/me",
+        user_data_request = requests.get("https://kapi.kakao.com/v2/user/me",
             headers={
                 "Authorization": f"Bearer {access_token}",
                 "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
             },
         )
-        print(user_data.json())
-        return Response(status=status.HTTP_200_OK)
+        user_datajson = user_data_request.json()
+        user_data = user_datajson.get("kakao_account").get("profile")
+        print(user_data)
+        email = user_datajson.get('kakao_account').get('email')
+        nickname = user_data.get("nickname")
+        profileimage = user_data.get("profile_image_url")
+        try:
+            user = User.objects.get(email=email)
+            if user.logintype == 'local':
+                return Response({'error':'소셜로그인 가입이메일이아닙니다'},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                refresh = RefreshToken.for_user(user)
+                refresh["email"] = user.email
+                refresh["nickname"] = user.nickname
+                refresh['logintype'] = user.logintype
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK
+                )
+        except:
+            user = User.objects.create_user(email=email,nickname=nickname, logintype='kakao')
+            user.set_unusable_password()
+            user.save()
+            profile=Profile.objects.get(user=user)
+            profile.profileimage = profileimage
+            profile.save()
+            refresh = RefreshToken.for_user(user)
+            refresh["email"] = user.email
+            refresh["nickname"] = user.nickname
+            refresh['logintype'] = user.logintype
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+                status=status.HTTP_200_OK
+            )
 
 class NaverLoginView(APIView):
     def post(self,request):
@@ -168,25 +206,103 @@ class NaverLoginView(APIView):
         client_secret = config('NAVER_CLIENT_SECRET')
         code = request.data.get('code')
         state = request.data.get('state')
-        print(f'client_id:{client_id},client_secret:{client_secret},code:{code},state:{state}')
         parameters = f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}&code={code}&state={state}"
         token_request = requests.get(f"https://nid.naver.com/oauth2.0/token?{parameters}")
         token_request = token_request.json()
         access_token = token_request.get("access_token")
-        user_info_request = requests.get("https://openapi.naver.com/v1/nid/me",
+        user_data_request = requests.get("https://openapi.naver.com/v1/nid/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        user_info = user_info_request.json()
-        print(user_info)
-        return Response(status=status.HTTP_200_OK)
+        user_datajson = user_data_request.json()
+        user_data = user_datajson.get('response')
+        email = user_data.get('email')
+        nickname = user_data.get('nickname')
+        profileimage = user_data.get('profile_image')
+        try:
+            user = User.objects.get(email=email)
+            if user.logintype == 'local':
+                return Response({'error':'소셜로그인 가입이메일이아닙니다'},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                refresh = RefreshToken.for_user(user)
+                refresh["email"] = user.email
+                refresh["nickname"] = user.nickname
+                refresh['logintype'] = user.logintype
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK
+                )
+        except:
+            user = User.objects.create_user(email=email,nickname=nickname,logintype='naver')
+            user.set_unusable_password()
+            user.save()
+            profile=Profile.objects.get(user=user)
+            profile.profileimage = profileimage
+            profile.save()
+            refresh = RefreshToken.for_user(user)
+            refresh["email"] = user.email
+            refresh["nickname"] = user.nickname
+            refresh['logintype'] = user.logintype
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+                status=status.HTTP_200_OK
+            )
 
 class GoogleLoginView(APIView):
     def post(self,request):
         access_token = request.data['code']
         headers = {'Authorization': f'Bearer {access_token}'}
-        user_data = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
-        user_data = user_data.json()
+        user_info_request = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
+        user_data = user_info_request.json()
         print(user_data)
+        
+        email = user_data.get('email')
+        nickname = user_data.get('name')
+        profileimage = user_data.get('picture')
+        try:
+            user = User.objects.get(email=email)
+            if user.logintype == 'local':
+                return Response({'error':'소셜로그인 가입이메일이아닙니다'},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                refresh = RefreshToken.for_user(user)
+                refresh["email"] = user.email
+                refresh["nickname"] = user.nickname
+                refresh['logintype'] = user.logintype
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK
+                )
+        except:
+            user = User.objects.create_user(email=email,nickname=nickname,logintype='google')
+            user.set_unusable_password()
+            user.save()
+            profile=Profile.objects.get(user=user)
+            profile.profileimage = profileimage
+            profile.save()
+            refresh = RefreshToken.for_user(user)
+            refresh["email"] = user.email
+            refresh["nickname"] = user.nickname
+            refresh['logintype'] = user.logintype
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        
+        
+        
+        
         return Response(status=status.HTTP_200_OK)
 
 class ProfileView(APIView):
