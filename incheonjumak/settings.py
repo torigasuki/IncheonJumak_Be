@@ -26,9 +26,13 @@ import my_settings
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'api.sw-iing.com',
+    '13.125.124.150',
+    'IncheonJumakLoadbalancer-1425492222.ap-northeast-2.elb.amazonaws.com'
+]
 
 
 # Application definition
