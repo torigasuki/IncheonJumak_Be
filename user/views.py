@@ -22,6 +22,7 @@ from django.template.loader import render_to_string
 from decouple import config
 from threading import Timer
 import re
+import requests
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
