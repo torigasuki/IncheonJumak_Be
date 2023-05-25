@@ -379,3 +379,6 @@ $RECYCLE.BIN/
 .env
 
 **/migrations/*.py
+
+#my_settings.py
+my_settings.py

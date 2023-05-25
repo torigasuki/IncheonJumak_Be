@@ -4,7 +4,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.ReviewView.as_view(), name='review_view'),
+    path('alcohol/', views.Alcohol_ReviewView.as_view(), name='review_view'),
+    path('brewery/', views.Brewery_ReviewView.as_view(), name='review_view'),
+    path('event/', views.Event_ReviewView.as_view(), name='review_view'),
     path('<int:review_id>/', views.ReviewDetailView.as_view(), name='review_detail_view'),
     path('comment/', views.CommentView.as_view(), name='comment_view'),
     path('comment/<int:comment_id>/', views.CommentDetailView.as_view(), name='comment_detail_view'),
