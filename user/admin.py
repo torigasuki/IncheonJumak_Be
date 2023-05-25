@@ -8,7 +8,7 @@ from django.db import router, transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
-from user.models import User
+from user.models import User, Follow, BookMark, Profile
 from user.forms import UserCreationForm
 
 csrf_protect_m = method_decorator(csrf_protect)
@@ -64,3 +64,7 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
+
+admin.site.register(Follow)
+admin.site.register(BookMark)
+admin.site.register(Profile)

@@ -29,7 +29,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'nickname', 'password')
+        fields = ('id','email', 'nickname', 'password')
         extra_kwargs = {'password': {'write_only': True}}
       
 class ProfileSerializer(serializers.ModelSerializer):
@@ -73,13 +73,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 # 다른 유저에게 보이는 profile serializer입니다
 class UserDetailSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(required=False)
     following = serializers.SerializerMethodField()
     follower = serializers.SerializerMethodField()
     bookmark = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'nickname', 'following', 'follower','bookmark',] 
+        fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark',] 
 
 
     # 프론트에서 구현할 수 있는 부분이라 일단 주석달아둡니다
