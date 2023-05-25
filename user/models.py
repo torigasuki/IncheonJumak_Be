@@ -22,8 +22,8 @@ class MyUserManager(BaseUserManager):
     def create_superuser(self, email,nickname='test', password=None):
         user = self.create_user(
             email,
-            password=password,
             nickname = nickname,
+            password=password,
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -52,10 +52,11 @@ class User(AbstractBaseUser):
     objects = MyUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["nickname",]
 
     def __str__(self):
         return self.email
+    
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
