@@ -4,6 +4,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from review.models import Review
 from review.serializers import ReviewSerializer, ReviewCreateSerializer, ReviewListSerializer
+from rest_framework import permissions
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -11,6 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 class ReviewView(APIView):
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly]
     def get(self, request):
         reviews = Review.objects.all()
         serializer = ReviewListSerializer(reviews, many=True)
@@ -18,11 +20,10 @@ class ReviewView(APIView):
     
     @swagger_auto_schema(request_body=ReviewCreateSerializer)
     def post(self, request):
-        print(request.user)
         serializer = ReviewCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

@@ -81,3 +81,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark',] 
 
+
+    # 프론트에서 구현할 수 있는 부분이라 일단 주석달아둡니다
+    # def get_followers_count(self, obj):
+    #     return obj.username.follower.count()
+
+    # def get_following_count(self, obj):
+    #     return obj.username.following.count()
