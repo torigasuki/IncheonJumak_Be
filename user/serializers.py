@@ -88,3 +88,4 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     # def get_following_count(self, obj):
     #     return obj.username.following.count()
+    
