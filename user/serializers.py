@@ -5,6 +5,7 @@ from django.core.files.storage import default_storage
 
 from uuid import uuid4
 import os
+
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -29,8 +30,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id','email', 'nickname', 'password')
+        fields = ('id','email', 'nickname', 'password', 'bookmark', 'follower', 'following',)
         extra_kwargs = {'password': {'write_only': True}}
+
+
       
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,18 +77,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 # 다른 유저에게 보이는 profile serializer입니다
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(required=False)
-    following = serializers.SerializerMethodField()
-    follower = serializers.SerializerMethodField()
-    bookmark = serializers.SerializerMethodField()
-
     class Meta:
         model = User
         fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark',] 
 
-
-    # 프론트에서 구현할 수 있는 부분이라 일단 주석달아둡니다
-    # def get_followers_count(self, obj):
-    #     return obj.username.follower.count()
-
-    # def get_following_count(self, obj):
-    #     return obj.username.following.count()
