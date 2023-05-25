@@ -73,10 +73,10 @@ class SendEmailView(APIView):
                 Verify.objects.create(email=email,code=code)
                 
                 timer = 600
-                # Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
+                Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
                 
-                return Response({'code':code},status=status.HTTP_200_OK) #테스트용
-                # return Response({'success':'success'},status=status.HTTP_200_OK)
+                # return Response({'code':code},status=status.HTTP_200_OK) #테스트용
+                return Response({'success':'success'},status=status.HTTP_200_OK)
 
 class VerificationEmailView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -121,6 +121,74 @@ class SignUpView(APIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
+    
+KAKAO_HOST= 'https://kauth.kakao.com/'
+class SocialUrlView(APIView):
+    def post(self,request):
+        social = request.data.get('social',None)
+        if social is None:
+            return Response({'error':'소셜로그인이 아닙니다'},status=status.HTTP_400_BAD_REQUEST)
+        elif social == 'kakao':
+            url = KAKAO_HOST + 'oauth/authorize?client_id=' + config('KAKAO_REST_API') + '&redirect_uri=' + config('REDIRECT_URI') + '&response_type=code&prompt=login'
+            return Response({'url':url},status=status.HTTP_200_OK)
+        elif social == 'naver':
+            url = 'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=' + config('NAVER_CLIENT_ID') + '&redirect_uri=' + config('REDIRECT_URI') + '&state=STATE_STRING'
+            return Response({'url':url},status=status.HTTP_200_OK)   
+        elif social == 'google':
+            return Response({'key':config('GOOGLE_API_KEY'),'redirecturi':config('REDIRECT_URI')},status=status.HTTP_200_OK)
+        
+
+class KakaoLoginView(APIView):
+    def post(self,request):
+        code = request.data.get('code')
+        print(code)
+        access_token = requests.post(KAKAO_HOST+"oauth/token",
+            headers={"Content-Type":"application/x-www-form-urlencoded"},
+            data={
+                "grant_type":"authorization_code",
+                "client_id":config('KAKAO_REST_API'),
+                "redirect_uri":"http://127.0.0.1:5500/index.html",
+                "code":code,
+            },
+        )
+        access_token = access_token.json().get("access_token")
+        user_data = requests.get("https://kapi.kakao.com/v2/user/me",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+            },
+        )
+        print(user_data.json())
+        return Response(status=status.HTTP_200_OK)
+
+class NaverLoginView(APIView):
+    def post(self,request):
+        grant_type = 'authorization_code' # 발급
+        client_id = config('NAVER_CLIENT_ID')
+        client_secret = config('NAVER_CLIENT_SECRET')
+        code = request.data.get('code')
+        state = request.data.get('state')
+        print(f'client_id:{client_id},client_secret:{client_secret},code:{code},state:{state}')
+        parameters = f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}&code={code}&state={state}"
+        token_request = requests.get(f"https://nid.naver.com/oauth2.0/token?{parameters}")
+        token_request = token_request.json()
+        access_token = token_request.get("access_token")
+        user_info_request = requests.get("https://openapi.naver.com/v1/nid/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        user_info = user_info_request.json()
+        print(user_info)
+        return Response(status=status.HTTP_200_OK)
+
+class GoogleLoginView(APIView):
+    def post(self,request):
+        access_token = request.data['code']
+        headers = {'Authorization': f'Bearer {access_token}'}
+        user_data = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
+        user_data = user_data.json()
+        print(user_data)
+        return Response(status=status.HTTP_200_OK)
+
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self,request):
