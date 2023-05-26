@@ -169,7 +169,7 @@ SWAGGER_SETTINGS = {
 }
 
 LOGIN_URL = 'rest_framework:login'
-LOGOUT_URL = 'rest_framework:logout'
+LOGOUT_URL = 'rest_framework:logout
 
 AUTH_USER_MODEL = 'user.User'
 
