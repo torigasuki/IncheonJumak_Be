@@ -8,6 +8,7 @@ from review.serializers import ReviewSerializer
 from uuid import uuid4
 import os
 
+
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
