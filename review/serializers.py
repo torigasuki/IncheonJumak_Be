@@ -5,8 +5,8 @@ from review.models import Alcohol_Review, Brewery_Review, Event_Review
 class Alcohol_ReviewSerializer(serializers.ModelSerializer):
     # user = serializers.SerializerMethodField()
     
-    # def get_user(self, obj):
-    #     return obj.user.email
+    def get_user(self, obj):
+        return obj.user.email
     
     class Meta:
         model = Alcohol_Review
@@ -72,8 +72,8 @@ class Brewery_ReviewListSerializer(serializers.ModelSerializer):
 class Event_ReviewListSerializer(serializers.ModelSerializer):
     # user = serializers.SerializerMethodField()
     
-    # def get_user(self, obj):
-    #     return obj.user.email
+    def get_user(self, obj):
+        return obj.user.email
     
     class Meta:
         model = Event_Review
