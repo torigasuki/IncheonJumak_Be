@@ -42,7 +42,7 @@ class User(AbstractBaseUser):
         message="비밀번호에 특수문자, 숫자, 영문자를 포함하여 8자리 이상이어야 합니다.",
         code = "invalid_password"
     )])
-    nickname = models.CharField(max_length=20)
+    nickname = models.CharField(max_length=20, null=True)
     followings = models.ManyToManyField("self", symmetrical=False, through='Follow')
     bookmark = models.ManyToManyField("alchol.Alchol", default=[], through='BookMark')
     logintype = models.CharField(max_length=10, default='local')
