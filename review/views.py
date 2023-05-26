@@ -10,7 +10,16 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 
-# Create your views here.
+class ReviewFilteringUserView(APIView):
+    def get(self, request, user_id):
+        find_reviews = Review.objects.filter(user_id=user_id)
+        if find_reviews:
+            serializer = ReviewListSerializer(find_reviews, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message':'아직 리뷰가 없습니다'}, status=status.HTTP_200_OK)
+        
+
 class ReviewView(APIView):
     permission_classes=[permissions.IsAuthenticatedOrReadOnly]
     def get(self, request):
@@ -74,3 +83,4 @@ class CommentDetailView(APIView):
 class LikeView(APIView):
     def post(self, request):
         pass
+
