@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserCreateSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,UserSerializer
+from .serializers import UserCreateSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,UserSerializer,UserDetailSerializer
 from rest_framework_simplejwt.views import (
     TokenObtainPairView
 )
@@ -310,7 +310,23 @@ class ProfileView(APIView):
     def get(self,request):
         me = request.user
         profile=Profile.objects.get(user=me)
-        return Response({'user': UserSerializer(me).data, 'profile': ProfileSerializer(profile).data}, status=status.HTTP_200_OK)
+
+        user_serializer = UserSerializer(me).data
+        # db요청을 최소화하기 위해 한번에 id를 가져오도록 하고, 이후에 각각 나누기
+        follow_id_list = user_serializer['follower'] +user_serializer['following']
+        follow_list = Follow.objects.filter(id__in=follow_id_list) 
+        follower_user_id_list = [follow.follower_id for follow in follow_list if follow.follower_id != me.id]
+        following_user_id_list = [follow.following_id for follow in follow_list if follow.following_id != me.id]
+        followed_user = User.objects.filter(id__in=follower_user_id_list + following_user_id_list).values('id','nickname',)
+        follow_user_map = {follow['id']: follow for follow in followed_user} 
+        for i in range(len(follower_user_id_list)): #[2,4,6] / i = 0 1 2
+            follower_user_id_list[i] = follow_user_map[follower_user_id_list[i]]
+        for i in range(len(following_user_id_list)):
+            following_user_id_list[i] = follow_user_map[following_user_id_list[i]]
+        user_serializer['follower'] = follower_user_id_list
+        user_serializer['following'] = following_user_id_list
+        return Response({'user': user_serializer, 'profile': ProfileSerializer(profile).data}, status=status.HTTP_200_OK)
+    
     def put(self,request):
         me = request.user
         profile=Profile.objects.get(user=me)
@@ -380,3 +396,9 @@ class BookMarkListView(APIView):
             return Response({"message":"북마크📌가 없습니다"}, status=status.HTTP_204_OK)
         else:
             return Response({'data':bookmark}, status=status.HTTP_200_OK)
+        
+class UserDetailView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id = user_id)
+        serializer = UserDetailSerializer(user, data=request.data)
+        Response(serializer.data, status=status.HTTP_200_OK)
