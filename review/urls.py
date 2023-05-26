@@ -8,6 +8,8 @@ urlpatterns = [
     path('brewery/', views.Brewery_ReviewView.as_view(), name='review_view'),
     path('event/', views.Event_ReviewView.as_view(), name='review_view'),
     path('<int:review_id>/', views.ReviewDetailView.as_view(), name='review_detail_view'),
+    #user id로 filtering review list
+    path('<int:user_id>/reviews/', views.ReviewFilteringUserView.as_view(), name='review_filtering_view'),
     path('comment/', views.CommentView.as_view(), name='comment_view'),
     path('comment/<int:comment_id>/', views.CommentDetailView.as_view(), name='comment_detail_view'),
     path('like/', views.LikeView.as_view(), name='like_view'),
