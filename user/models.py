@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import RegexValidator,FileExtensionValidator
 from alchol.models import Alchol
+from .validators import MaxFileSizeValidator
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email,nickname, password=None,**extra_fields):
@@ -76,7 +77,7 @@ class User(AbstractBaseUser):
     
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profileimage=models.ImageField(upload_to='profile/', blank=True, null=True)
+    profileimage=models.ImageField(upload_to='profile/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), MaxFileSizeValidator(1024 * 1024)])
     introduction = models.TextField(blank=True, null=True)
     
 class Verify(models.Model):
@@ -92,4 +93,3 @@ class Follow(models.Model):
 class BookMark(models.Model):
     marked_user = models.ForeignKey('User', on_delete=models.CASCADE, null=True, related_name='marked_user')
     alchol = models.ForeignKey('alchol.Alchol', on_delete=models.CASCADE, null=True)
-
