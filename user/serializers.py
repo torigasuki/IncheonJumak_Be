@@ -3,7 +3,7 @@ from .models import User,Verify,Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.core.files.storage import default_storage
 from alchol.serializers import AlcholSerializer
-from review.serializers import ReviewSerializer
+# from review.serializers import ReviewSerializer
 
 from uuid import uuid4
 import os
