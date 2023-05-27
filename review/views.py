@@ -8,7 +8,6 @@ from review.serializers import (Alcohol_ReviewSerializer,
                                 Brewery_ReviewSerializer,
                                 Event_ReviewSerializer)
 
-
 # Create your views here.
 class Alcohol_ReviewView(APIView):
     def get(self, request):
@@ -48,19 +47,6 @@ class Event_ReviewView(APIView):
         serializer = Event_ReviewSerializer(eve_reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     def post(self, request):
-<<<<<<< HEAD
-        pass
-    
-class CommentDetailView(APIView):
-    def put(self, request):
-        pass
-    def delete(self, request):
-        pass
-    
-class LikeView(APIView):
-    def post(self, request):
-        pass
-=======
         # print(request.user)
         serializer = Event_ReviewSerializer(data=request.data)
         if serializer.is_valid():
@@ -88,7 +74,7 @@ class Alcohol_ReviewDetailView(APIView):
 #         pass
 #     def post(self, request):
 #         pass
-    
+
 # class CommentDetailView(APIView):
 #     def put(self, request):
 #         pass
@@ -98,4 +84,3 @@ class Alcohol_ReviewDetailView(APIView):
 # class LikeView(APIView):
 #     def post(self, request):
 #         pass
->>>>>>> 2fdce65f803a0304e6a6a8f718277230084f62f6

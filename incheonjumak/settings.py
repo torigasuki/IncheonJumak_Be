@@ -151,9 +151,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 8 # 기본이 8. 각 views.py에서 오버라이딩 가능
-
 }
 
 SWAGGER_SETTINGS = {
@@ -169,7 +166,7 @@ SWAGGER_SETTINGS = {
 }
 
 LOGIN_URL = 'rest_framework:login'
-LOGOUT_URL = 'rest_framework:logout
+LOGOUT_URL = 'rest_framework:logout'
 
 AUTH_USER_MODEL = 'user.User'
 
