@@ -6,7 +6,9 @@ from rest_framework import permissions
 from review.models import Alcohol_Review, Brewery_Review, Event_Review
 from review.serializers import (Alcohol_ReviewSerializer,
                                 Brewery_ReviewSerializer,
-                                Event_ReviewSerializer)
+                                Event_ReviewSerializer,
+                                )
+        
 
 # Create your views here.
 class Alcohol_ReviewView(APIView):

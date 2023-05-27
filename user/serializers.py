@@ -81,7 +81,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 # 다른 유저에게 보이는 profile serializer입니다
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(required=False)
-
+    review = ReviewSerializer(many=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark',] 
+        fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark', 'review',] 
