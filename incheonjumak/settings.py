@@ -19,7 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 import my_settings
 
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -27,13 +26,9 @@ import my_settings
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    'api.sw-iing.com',
-    '13.125.124.150',
-    'IncheonJumakLoadbalancer-1425492222.ap-northeast-2.elb.amazonaws.com'
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -150,7 +145,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 8, # 기본이 8. 각 views.py에서 오버라이딩 가능
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    )
 }
 
 SWAGGER_SETTINGS = {
