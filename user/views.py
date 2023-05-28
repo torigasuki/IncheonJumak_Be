@@ -75,8 +75,8 @@ class SendEmailView(APIView):
                 timer = 600
                 Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
                 
-                # return Response({'code':code},status=status.HTTP_200_OK) #테스트용
-                return Response({'success':'success'},status=status.HTTP_200_OK)
+                return Response({'code':code},status=status.HTTP_200_OK) #테스트용
+                # return Response({'success':'success'},status=status.HTTP_200_OK)
 
 class VerificationEmailView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -299,11 +299,6 @@ class GoogleLoginView(APIView):
                 status=status.HTTP_200_OK
             )
         
-        
-        
-        
-        
-        return Response(status=status.HTTP_200_OK)
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -349,7 +344,7 @@ class FollowView(APIView):
             Follow.objects.create(id=request_user, user_id=user_id)
             return Response({"message":"팔로우"}, status=status.HTTP_200_OK)
 
-class FollowingView(APIView):
+class FollowingView(APIView): #팔로우 기능 이거 작동 안해요# pull해와야 작동함#ㅠㅠ
     """해당 user가 follow한 user 가져오기, following"""
     def get(self, request, user_id):
 

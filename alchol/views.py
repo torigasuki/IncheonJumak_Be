@@ -5,16 +5,16 @@ from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from alchol.models import Alchol
 from alchol.serializers import AlcholSerializer
+from review.serializers import Alcohol_ReviewSerializer
 from rest_framework.pagination import PageNumberPagination
-from alchol.serializers import AlcholListSerializer
 
 class AlcholPagination(PageNumberPagination):
-    page_size = 2 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
+    page_size = 4 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
 
     
 class AlcholView(APIView):
     pagination_class = AlcholPagination
-    serializer_class = AlcholListSerializer
+    serializer_class = AlcholSerializer
     @property
     def paginator(self):
         if not hasattr(self, '_paginator'):
@@ -57,4 +57,6 @@ class AlcholDetailView(APIView):
     def get(self, request, alchol_id):
         alchol = get_object_or_404(Alchol, id=alchol_id)
         serializer = AlcholSerializer(alchol)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        reviews = alchol.alchol_review.all()
+        alc_serializer = Alcohol_ReviewSerializer(reviews, many=True)
+        return Response({'alchol': serializer.data, 'reviews': alc_serializer.data}, status=status.HTTP_200_OK)

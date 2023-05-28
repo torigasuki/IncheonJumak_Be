@@ -1,53 +1,57 @@
 from rest_framework import serializers
-
 from review.models import Alcohol_Review, Brewery_Review, Event_Review
 
 class Alcohol_ReviewSerializer(serializers.ModelSerializer):
-    # user = serializers.SerializerMethodField()
-    
-    # def get_user(self, obj):
-    #     return obj.user.email
-    
+    table = serializers.SerializerMethodField()
+
+    def get_table(self, obj):
+        table = self.Meta.model._meta.db_table
+        return table.split('_')[1]
+
     class Meta:
         model = Alcohol_Review
-        fields = '__all__'
+        fields = ('id', 'content', 'updated_at', 'table','user')
+
 
 class Brewery_ReviewSerializer(serializers.ModelSerializer):
-    # user = serializers.SerializerMethodField()
-    
-    # def get_user(self, obj):
-    #     return obj.user.email
-    
+    table = serializers.SerializerMethodField()
+
+    def get_table(self, obj):
+        table = self.Meta.model._meta.db_table
+        return table.split('_')[1]
+
     class Meta:
         model = Brewery_Review
-        fields = '__all__'
+        fields = ('id', 'content', 'updated_at', 'table','user')
 
 
 class Event_ReviewSerializer(serializers.ModelSerializer):
-    # user = serializers.SerializerMethodField()
-    
-    # def get_user(self, obj):
-    #     return obj.user.email
+    table = serializers.SerializerMethodField()
+
+    def get_table(self, obj):
+        table = self.Meta.model._meta.db_table
+        return table.split('_')[1]
     
     class Meta:
         model = Event_Review
-        fields = '__all__'
+        fields = ('id', 'content', 'updated_at', 'table','user')
+        
         
 class Alcohol_ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alcohol_Review
-        fields = ("content")
+        fields = ["content",]
 
 class Brewery_ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brewery_Review
-        fields = ("content")
+        fields = ["content",]
 
 
 class Event_ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event_Review
-        fields = ("content")
+        fields = ["content",]
         
 class Alcohol_ReviewListSerializer(serializers.ModelSerializer):
     # user = serializers.SerializerMethodField()
@@ -78,6 +82,3 @@ class Event_ReviewListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event_Review
         fields = ("pk", "content", "updated_at") 
-        
-        
- 

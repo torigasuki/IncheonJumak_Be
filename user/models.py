@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator,FileExtensionValidator
 from alchol.models import Alchol
+from django.core.exceptions import ValidationError
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email,nickname, password=None,**extra_fields):
@@ -73,11 +74,20 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+def validate_image_size(value):
+    if value.size > 1024 * 1024:
+        raise ValidationError("이미지 크기는 1MB 이하여야 합니다.")   
     
-class Profile(models.Model):
+class Profile(models.Model):  
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profileimage=models.ImageField(upload_to='profile/', blank=True, null=True)
+    profileimage = models.ImageField(upload_to='profile/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), validate_image_size])
     introduction = models.TextField(blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        if self.profileimage:
+            validate_image_size(self.profileimage)
+        super().save(*args, **kwargs)
+
     
 class Verify(models.Model):
     email = models.EmailField()

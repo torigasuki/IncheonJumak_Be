@@ -3,12 +3,12 @@ from brewery.models import Brewery
 
 
 class BrewerySerializer(serializers.ModelSerializer):
+    alchol_name = serializers.SerializerMethodField()
+
+    def get_alchol_name(self, obj):
+        return obj.alchol.name
+        
+    
     class Meta:
         model = Brewery
-        fields = "__all__"
-
-
-class BreweryListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brewery
-        fields = "__all__"
+        fields ='__all__'

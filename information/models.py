@@ -11,6 +11,7 @@ class Event(models.Model):
     region = models.CharField(max_length=10)
     started_at = models.DateTimeField()
     ended_at = models.DateTimeField()
+    image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return str(self.eventname)
