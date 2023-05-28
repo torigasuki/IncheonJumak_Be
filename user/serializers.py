@@ -2,9 +2,12 @@ from rest_framework import serializers
 from .models import User,Verify,Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.core.files.storage import default_storage
+from alchol.serializers import AlcholSerializer
+# from review.serializers import ReviewSerializer
 
 from uuid import uuid4
 import os
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +31,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('이메일 인증을 해주세요.', code='not_verify')
         
 class UserSerializer(serializers.ModelSerializer):
+    bookmark = AlcholSerializer(many=True)
     class Meta:
         model = User
         fields = ('id','email', 'nickname', 'password', 'bookmark', 'follower', 'following',)
@@ -77,14 +81,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 # 다른 유저에게 보이는 profile serializer입니다
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(required=False)
+    review = ReviewSerializer(many=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark',] 
-
-
-    # 프론트에서 구현할 수 있는 부분이라 일단 주석달아둡니다
-    # def get_followers_count(self, obj):
-    #     return obj.username.follower.count()
-
-    # def get_following_count(self, obj):
-    #     return obj.username.following.count()
+        fields = ['id', 'email', 'nickname', 'profile_image', 'introduction', 'following', 'follower','bookmark', 'review',] 

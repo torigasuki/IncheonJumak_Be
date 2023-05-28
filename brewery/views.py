@@ -4,17 +4,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from brewery.models import Brewery
-from brewery.serializers import BrewerySerializer, BreweryListSerializer
+from brewery.serializers import BrewerySerializer
+from review.serializers import Brewery_ReviewSerializer
 from rest_framework.pagination import PageNumberPagination
 
     
 class BreweryPagination(PageNumberPagination):
-    page_size = 2 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
+    page_size = 4 #임의 페이지 수 설정해놨으니 후에 수정하면 됨
 
 
 class BreweryView(APIView):
     pagination_class = BreweryPagination
-    serializer_class = BreweryListSerializer
+    serializer_class = BrewerySerializer
     @property
     def paginator(self):
         if not hasattr(self, '_paginator'):
@@ -50,4 +51,6 @@ class BreweryDetailView(APIView):
     def get(self, request, brewery_id):
         breweries = get_object_or_404(Brewery, id=brewery_id)
         serializer = BrewerySerializer(breweries)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        reviews = breweries.brewery_review.all()
+        brew_serializer = Brewery_ReviewSerializer(reviews, many=True)
+        return Response({'brewery': serializer.data, 'reviews': brew_serializer.data}, status=status.HTTP_200_OK)

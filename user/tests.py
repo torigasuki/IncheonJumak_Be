@@ -2,7 +2,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from user.models import User,Verify
+from user.models import User,Verify, BookMark, Follow
+from alchol.models import Alchol
+
 
 class sendEmailTest(APITestCase):
     def setUp(self):
@@ -208,3 +210,91 @@ class loginTest(APITestCase):
         }
         response = self.client.post(self.url,user,format='json')
         self.assertEqual(response.status_code,401)
+
+#alchol 북마크 기능 테스트
+class BookmarkOfAlcholCreateTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.alchol_data = {
+            'id':1,
+            'name':'안동소주',
+            'sort':'소주',
+            'beverage':10.0,
+            'taste':'깔끔한',
+            }
+        cls.user_data = {'id':1,"email": "test@test.com", "nickname":'test', "password": "test12!@"}
+        cls.user = User.objects.create_user("test@test.com", 'test', 'test12!@', id=1)
+        cls.alchol = Alchol.objects.create(**cls.alchol_data)
+
+    def setUp(self):
+        self.access_token = self.client.post(
+            reverse("login"), self.user_data).data["access"]
+
+    def test_alchol_bookmark(self):
+        response = self.client.post(
+            reverse('bookmark_view', kwargs={'alchol_id':self.alchol.id,}),
+            marked_user_id=self.user.id,
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            ) 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'message': '북마크📌'})
+
+    def test_alchol_bookmark_cancel(self):
+        bookmark = BookMark.objects.create(marked_user_id=self.user.id, alchol_id=self.alchol.id)
+        response = self.client.post(
+            reverse('bookmark_view', kwargs={"alchol_id": self.alchol.id}),
+            marked_user_id=self.user.id,
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            ) 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'message': '북마크📌 취소'})
+
+
+#유저 팔로잉 기능 테스트
+class FollowTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_data = {'id':1,"email": "test@test.com", "nickname":'test', "password": "test12!@"}
+        cls.user_data2 = {'id':2,"email": "test2@test.com", "nickname":'test2', "password": "test12!@"}
+        cls.user_data3 = {'id':3,"email": "test33@test.com", "nickname":'test33', "password": "test12!@"}
+
+        cls.user = User.objects.create_user(id=1,email="test@test.com", nickname='test', password='test12!@')
+        cls.user2 = User.objects.create_user(id=2,email="test2@test.com", nickname='test2', password='test12!@')
+
+    def setUp(self):
+        self.access_token = self.client.post(
+            reverse("login"), self.user_data).data["access"]
+
+    def test_followview_make_follow(self):
+        response = self.client.post(
+            reverse('follow', args=[self.user2.id,]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            ) 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'message': "팔로우"})
+
+    def test_followview_cancel_follow(self):
+        following_data = Follow.objects.create(follower_id=self.user.id, following_id=self.user2.id)
+        response = self.client.post(
+            reverse('follow', args=[self.user2.id,]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            ) 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'message':"팔로우 취소"})
+
+    def test_get_none_following_list(self):
+        response = self.client.get(
+            reverse('follow_user_view', kwargs={'follow_id':1,})
+        )
+        self.assertEqual(response.data, {'message': '아직 팔로우 정보가 없습니다.'})
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_get_following_list(self):
+        user2_following_data = Follow.objects.create(id=1,follower_id=self.user2.id, following_id=self.user.id) # id = 3 !!
+
+        response = self.client.get(
+            reverse('follow_user_view', kwargs={'follow_id':1,})
+        )
+        self.assertEqual(Follow.objects.count(), 1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+

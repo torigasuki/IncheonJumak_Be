@@ -16,12 +16,13 @@ urlpatterns = [
     path('naver/', views.NaverLoginView.as_view(), name='naver_login'),
     path('google/', views.GoogleLoginView.as_view(), name='google_login'),
     #follow 기능 url
-    path("<int:user_id>/follow/", views.FollowView.as_view(), name="follow_user"),
-    path("<int:user_id>/followings/", views.FollowingView.as_view(), name="followings"),
-    path("<int:user_id>/followers/", views.FollowerView.as_view(), name="followers"),
+    path("<int:user_id>/follow/", views.FollowView.as_view(), name="follow"),
+    path("<int:follow_id>/followed/", views.FollowingUserView.as_view(), name="follow_user_view"),
     #bookmark 기능 url
     path("<int:alchol_id>/bookmark/", views.BookMarkView.as_view(), name="bookmark_view"),
     path("<int:user_id>/bookmark_list/",views.BookMarkListView.as_view(),name="bookmark_list_view",),
     #profile url
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    #user detail url
+    path('<int:user_id>/detail/', views.UserDetailView.as_view(), name='user_detail_view')
 ]

@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserCreateSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,UserSerializer
+from .serializers import UserCreateSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,UserSerializer,UserDetailSerializer
 from rest_framework_simplejwt.views import (
     TokenObtainPairView
 )
@@ -75,8 +75,8 @@ class SendEmailView(APIView):
                 timer = 600
                 Timer(timer,self.timer_delet,(email,)).start() #테스트코드에서 있으면 10분동안 멈춤
                 
-                # return Response({'code':code},status=status.HTTP_200_OK) #테스트용
-                return Response({'success':'success'},status=status.HTTP_200_OK)
+                return Response({'code':code},status=status.HTTP_200_OK) #테스트용
+                # return Response({'success':'success'},status=status.HTTP_200_OK)
 
 class VerificationEmailView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -299,18 +299,29 @@ class GoogleLoginView(APIView):
                 status=status.HTTP_200_OK
             )
         
-        
-        
-        
-        
-        return Response(status=status.HTTP_200_OK)
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self,request):
         me = request.user
         profile=Profile.objects.get(user=me)
-        return Response({'user': UserSerializer(me).data, 'profile': ProfileSerializer(profile).data}, status=status.HTTP_200_OK)
+
+        user_serializer = UserSerializer(me).data
+        # db요청을 최소화하기 위해 한번에 id를 가져오도록 하고, 이후에 각각 나누기
+        follow_id_list = user_serializer['follower'] +user_serializer['following']
+        follow_list = Follow.objects.filter(id__in=follow_id_list) 
+        follower_user_id_list = [follow.follower_id for follow in follow_list if follow.follower_id != me.id]
+        following_user_id_list = [follow.following_id for follow in follow_list if follow.following_id != me.id]
+        followed_user = User.objects.filter(id__in=follower_user_id_list + following_user_id_list).values('id','nickname',)
+        follow_user_map = {follow['id']: follow for follow in followed_user} 
+        for i in range(len(follower_user_id_list)): #[2,4,6] / i = 0 1 2
+            follower_user_id_list[i] = follow_user_map[follower_user_id_list[i]]
+        for i in range(len(following_user_id_list)):
+            following_user_id_list[i] = follow_user_map[following_user_id_list[i]]
+        user_serializer['follower'] = follower_user_id_list
+        user_serializer['following'] = following_user_id_list
+        return Response({'user': user_serializer, 'profile': ProfileSerializer(profile).data}, status=status.HTTP_200_OK)
+    
     def put(self,request):
         me = request.user
         profile=Profile.objects.get(user=me)
@@ -325,38 +336,24 @@ class FollowView(APIView):
 
     def post(self, request, user_id):
         request_user = request.user
-        following_user = Follow.objects.filter(id=request_user, user_id=user_id).last()
+        following_user = Follow.objects.filter(follower_id=request_user.id, following_id=user_id).last()
         if following_user:
             following_user.delete()
             return Response({"message":"팔로우 취소"}, status=status.HTTP_200_OK)
         else:
-            Follow.objects.create(id=request_user, user_id=user_id)
+            Follow.objects.create(follower_id=request_user.id, following_id=user_id)
             return Response({"message":"팔로우"}, status=status.HTTP_200_OK)
 
-class FollowingView(APIView):
-    """해당 user가 follow한 user 가져오기, following"""
-    def get(self, request, user_id):
-
-        user = User.objects.get(id=user_id)
-        following_list = Follow.objects.filter(following=user) 
-        #follow한 user가 없으면
-        if not following_list:
-            return Response({'message': '팔로우한 계정이 없습니다.'}, status=status.HTTP_204_OK)
-        #follow한 user가 있으면
+#follow id값으로 쿼리를 반복요청하게 되기때문에 좋은 코드가 아닙니다. 참고하시되 다른 방향으로 적용하세요!
+class FollowingUserView(APIView):
+    """follow id로 user id 및 nickname 가져오기"""
+    def get(self, request, follow_id):
+        following_id_list = Follow.objects.filter(id=follow_id).values_list('following_id', flat=True)
+        user = User.objects.filter(id__in=following_id_list).values('id','nickname',)
+        if not user:
+            return Response({'message': '아직 팔로우 정보가 없습니다.'}, status=status.HTTP_204_NO_CONTENT)
         else:
-            return Response(following_list.data, status=status.HTTP_200_OK)
-        
-        
-class FollowerView(APIView):
-    """ 해당 user를 follow한 user 가져오기. follower"""
-    def get(self, request, user_id):
-        user = User.objects.get(id=user_id)
-        follower_list = Follow.objects.filter(follower=user)
-
-        if not follower_list:
-            return Response({'message': '팔로워가 없습니다.'}, status=status.HTTP_204_OK)
-        else:
-            return Response(follower_list.data, status=status.HTTP_200_OK)
+            return Response(user, status=status.HTTP_200_OK)
 
 
 class BookMarkView(APIView):
@@ -364,12 +361,12 @@ class BookMarkView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, alchol_id):
-        bookmark = BookMark.objects.filter(marked_user_id=request.user, alchol_id=alchol_id).last()
+        bookmark = BookMark.objects.filter(marked_user_id=request.user.id, alchol_id=alchol_id).last()
         if bookmark:
             bookmark.delete()
             return Response({"message":"북마크📌 취소"}, status=status.HTTP_200_OK)
         else:
-            BookMark.objects.create(marked_user_id=request.user, alchol_id=alchol_id)
+            BookMark.objects.create(marked_user_id=request.user.id, alchol_id=alchol_id)
             return Response({"message":"북마크📌"}, status=status.HTTP_200_OK)
 
 class BookMarkListView(APIView):
@@ -380,3 +377,9 @@ class BookMarkListView(APIView):
             return Response({"message":"북마크📌가 없습니다"}, status=status.HTTP_204_OK)
         else:
             return Response({'data':bookmark}, status=status.HTTP_200_OK)
+        
+class UserDetailView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id = user_id)
+        serializer = UserDetailSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
