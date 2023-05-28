@@ -180,7 +180,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50000),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=80),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -220,13 +220,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
+    "https://sw-iing.com",
 ]
 
 # cors 허용 리스트 추가
-CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:8000',
-                        'http://localhost:8000',
-                        'http://127.0.0.1:5500',
-                        'http://localhost:5500',
-                        ]
+CORS_ORIGIN_WHITELIST = ['https://sw-iing.com']
 CORS_ALLOW_CREDENTIALS = True
