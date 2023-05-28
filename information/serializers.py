@@ -3,13 +3,11 @@ from information.models import Event
 
 
 class EventSerializer(serializers.ModelSerializer):
+    alchol_name = serializers.SerializerMethodField()
+
+    def get_alchol_name(self, obj):
+        return obj.alchol.name
+    
     class Meta:
         model = Event
-        fields = "__all__"
-
-
-class EventListSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Event
-        fields = "__all__"
+        fields = '__all__'
